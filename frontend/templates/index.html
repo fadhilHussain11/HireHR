@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>HR-Agents</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+</head>
+<body>
+    <form action="{{ url_for('job_desc') }}" method="POST">
+        <textarea name="job_description" id="job_description" rows="10",cols="50"></textarea>
+        <button type="submit">Upload job_desciption</button>
+    </form>
+</body>
+</html>
