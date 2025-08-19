@@ -13,5 +13,10 @@
         <textarea name="job_description" id="job_description" rows="10",cols="50"></textarea>
         <button type="submit">Upload job_desciption</button>
     </form>
+
+    <form action="{{ url_for('Review_panel') }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="resumes" multiple accept=".pdf">
+        <button type="submit">Upload Resumes</button>
+    </form>
 </body>
 </html>
