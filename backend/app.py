@@ -1,6 +1,7 @@
 import os
 from flask import Flask,render_template,url_for,request
 from agents.src.JD_embeddings import job_embedding
+from agents.src.agents import call_agent
 
 #defining frontendpath
 temp_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','templates')
@@ -26,6 +27,7 @@ def job_desc():
 
 @app.route('/Review_panel',methods=["POST"])
 def Review_panel():
+    results = []
     if "resumes" not in request.files:
         return "No files are uploaded"
     files = request.files.getlist("resumes")
@@ -33,7 +35,10 @@ def Review_panel():
         if file.filename.endswith(".pdf"):
             save_path = os.path.join(resumes_dir,file.filename)
             file.save(save_path)
-    return f"pdf are uploaded"
+            print(f"pdf are uploaded")
+            result = call_agent(file)
+            results.append(result)
+    return f"results are : {results}"
 
 
 
