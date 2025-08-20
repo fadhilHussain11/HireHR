@@ -1,16 +1,16 @@
 import os
-from flask import Flask,render_template,url_for,request
+from flask import Flask,render_template,url_for,request,jsonify
 from agents.src.JD_embeddings import job_embedding
 from agents.src.agents import call_agent
 
 #defining frontendpath
 temp_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','templates')
-# static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','static')
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','static')
 resumes_dir = os.path.join(os.path.dirname(__file__),"resumes")
 
 
 #flask init...zation
-application = Flask(__name__,template_folder=temp_dir)
+application = Flask(__name__,template_folder=temp_dir,static_folder=static_dir)
 app = application
 
 @app.route('/')
@@ -19,11 +19,12 @@ def index():
 
 @app.route('/job_desc',methods=["POST"])
 def job_desc():
-    job_desc_text = request.form["job_description"]
+    data = request.get_json()
+    job_desc_text = data.get("requirement","")
     job_desc_embedding = job_embedding(job_desc_text)
     if job_desc_embedding:
         print("embedding success")
-    return "job description success"
+    return jsonify({"status":"success"})
 
 @app.route('/Review_panel',methods=["POST"])
 def Review_panel():

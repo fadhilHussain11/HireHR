@@ -1,22 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>HR-Agents</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
+  <meta charset="UTF-8">
+  <title>HR Screening</title>
+  <link rel="stylesheet" href="{{ url_for('static',filename='main.css') }}">
 </head>
 <body>
-    <form action="{{ url_for('job_desc') }}" method="POST">
-        <textarea name="job_description" id="job_description" rows="10",cols="50"></textarea>
-        <button type="submit">Upload job_desciption</button>
-    </form>
+  <div class="container">
+    
+    <!-- Top Section -->
+    <div class="top-section">
+      <!-- Left: Preview -->
+      <div class="preview-box" id="preview">
+        <p><i>Live preview will appear here...</i></p>
+      </div>
+      
+      <!-- Right: Textarea -->
+      <div class="textarea-box">
+        <label><b>Enter Requirement</b></label>
+        <textarea id="reqText"></textarea>
+      </div>
+    </div>
 
-    <form action="{{ url_for('Review_panel') }}" method="POST" enctype="multipart/form-data">
-        <input type="file" name="resumes" multiple accept=".pdf">
-        <button type="submit">Upload Resumes</button>
-    </form>
+    <!-- Table Section -->
+    <div class="table-section">
+      <table id="candidatesTable">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Experience</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be auto generated -->
+        </tbody>
+      </table>
+
+      <button class="btn">Select Candidate</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static',filename='main.js') }}"></script>
 </body>
 </html>
