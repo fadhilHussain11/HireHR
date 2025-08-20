@@ -36,7 +36,8 @@ def Review_panel():
             save_path = os.path.join(resumes_dir,file.filename)
             file.save(save_path)
             print(f"pdf are uploaded")
-            result = call_agent(file)
+            resume_id = os.path.splitext(file.filename)[0]
+            result = call_agent(resume_id,save_path)
             results.append(result)
     return f"results are : {results}"
 

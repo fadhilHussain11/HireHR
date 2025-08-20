@@ -1,2 +1,5 @@
 langchain
 flask
+pydantic
+pdfplumber
+langchain_groq
