@@ -1,17 +1,31 @@
 import json, pdfplumber
 from agents.src.utils import ResultStore,create_agent,get_llm
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator,model_validator
 from langchain.tools import StructuredTool
 from langchain.prompts import SystemMessagePromptTemplate,HumanMessagePromptTemplate,ChatPromptTemplate
+from langchain.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 
 
 #llm model
 llm = get_llm()
 
+#initil..zation embedding
+JD_embeded_file = r"D:\llmora\agents\embeddings\job_description"
+embeddings = HuggingFaceEmbeddings(model_name ="BAAI/bge-small-en",show_progress=True)
+db = FAISS.load_local(
+    folder_path=JD_embeded_file,
+    embeddings=embeddings,
+    allow_dangerous_deserialization=True
+    )
+
+
 #initili...lize store for storing result
 STORE = ResultStore()
 
-#Making Tools 
+
+
+
 
 #----------load pdf first tool and stores to STORE ----> texts--------
 
@@ -54,6 +68,7 @@ LOADPDFTOSTORE = StructuredTool.from_function(
 
 
 
+
 #------------- Info&Summary Tool --------------
 
 #input validation , for info tool 
@@ -70,13 +85,20 @@ def resume_info_and_summary(resume_id):
     You are HR assistant. from the resume text below, extract the following:
     
     1. Full name
-    2. email address
+    2. Email address
     3. Phone number
     4. A concise, clear summary of the candidate, highlighting:
          - Skills
          - Years of experience
     
-    Return the result in **strict Json format**
+    Return the result in **strict Json format** like this:
+
+    {{
+       "name" : "...",
+       "email" : "...",
+       "phone" : "...",
+       "summary" : "..."
+    }}
 
     resume text:
     {text}
@@ -96,6 +118,62 @@ def resume_info_and_summary(resume_id):
     return f"info and summary are saved"
 
 # define infoANDsummary TOOL
+INFOANDSUMMARY = StructuredTool.from_function(
+    func=resume_info_and_summary,
+    name="infosummaryTool",
+    description="Uses LLM to extract name, email, phone, and a clear summary of the text.",
+    args_schema=InfoAndSummaryInput,
+)
+
+
+
+
+
+#---------------Performance score  ----------------
+
+
+#input validation 
+class PerformanceInput(BaseModel):
+    resume_id: str = Field(...,description="A unique id to refer to this resume")
+
+#output validation
+class PerformanceOutput(BaseModel):
+    similarity_score: float = Field(...,description="performance score of this resume candidate's based on JD_embeded")
+    performance_score: float = Field(...,description="converted score")
+
+    @model_validator("before")
+    def convert_sscore_to_pscore(cls,values):
+        resume_score = values["similarity_score"] 
+        max_expected = 1.0
+        points = 10.0 * max(0.0,(max_expected - resume_score) / max_expected)
+        values["performance_score"] = round(points,2)
+        return values
+
+#function tool
+def performance_score_function(resume_id):
+    text = STORE.texts.get(resume_id,"") 
+
+    s_score = db.similarity_search_with_score(text,k=1)[0][1]
+
+    #validating output
+    validated_output = PerformanceOutput(similarity_score=s_score)
+    #save score
+    STORE.scores[resume_id] = validated_output.performance_score
+
+    return validated_output
+
+# defining performance TOOL
+PERFORMANCESCORE = StructuredTool(
+    func=performance_score_function,
+    name="performanceScoreTool",
+    description="finds performance score of the stored text against the JD_embeded_file and saves it. ",
+    args_schema=PerformanceInput,
+    return_schema = PerformanceOutput
+)
+
+
+
+
 
 
 #------------- WholeResult saving Tools -----------
@@ -106,9 +184,14 @@ class WholeresultInput(BaseModel):
 
 #defining tools function 
 def whole_result(resume_id):
-    text = STORE.texts.get(resume_id,"")
+    info = STORE.info.get(resume_id,{})
+    performance_score = STORE.scores.get(resume_id,{})
     result_out = {
-        "text" : text
+        "name":  info.get("name",""),
+        "email": info.get("email",""),
+        "phone": info.get("phone",""),
+        "performance_score": performance_score,
+        "summary": info.get("summary","")
     }
     return json.dumps(result_out)
 
@@ -122,7 +205,7 @@ WHOLERESULT = StructuredTool.from_function(
 )
 
 #defining list of tools
-tools = [LOADPDFTOSTORE,WHOLERESULT]
+tools = [LOADPDFTOSTORE,INFOANDSUMMARY,PERFORMANCESCORE,WHOLERESULT]
 
 #agent initi...lization
 agent = create_agent(
@@ -131,10 +214,14 @@ agent = create_agent(
 )
 
 
+
+
 def call_agent(resume_id:str,save_path:str) -> dict:
     system_template = """You must process resume in EXACTLY this order:
     1) LOADPDFTOSTORE(resume_id,save_path)
-    2) WHOLERESULT(resume_id)  <-- return THIS as the final output
+    2) INFOANDSUMMARY(resume_id)
+    3) PERFORMANCESCORE(resume_id)
+    4) WHOLERESULT(resume_id)  <-- return THIS as the final output
 
 
     Rules:
