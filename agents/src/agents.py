@@ -1,23 +1,17 @@
 import json, pdfplumber
-from agents.src.utils import ResultStore,create_agent,get_llm
+from agents.src.utils import ResultStore,create_agent,get_llm,get_embeddings
 from pydantic import BaseModel, Field, field_validator,model_validator
 from langchain.tools import StructuredTool
 from langchain.prompts import SystemMessagePromptTemplate,HumanMessagePromptTemplate,ChatPromptTemplate
-from langchain.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 
+
+#calling embedding
+db = get_embeddings()
 
 #llm model
 llm = get_llm()
 
-#initil..zation embedding
-JD_embeded_file = r"D:\llmora\agents\embeddings\job_description"
-embeddings = HuggingFaceEmbeddings(model_name ="BAAI/bge-small-en",show_progress=True)
-db = FAISS.load_local(
-    folder_path=JD_embeded_file,
-    embeddings=embeddings,
-    allow_dangerous_deserialization=True
-    )
+
 
 
 #initili...lize store for storing result
@@ -141,12 +135,12 @@ class PerformanceOutput(BaseModel):
     similarity_score: float = Field(...,description="performance score of this resume candidate's based on JD_embeded")
     performance_score: float = Field(...,description="converted score")
 
-    @model_validator("before")
+    @model_validator(mode="before")
     def convert_sscore_to_pscore(cls,values):
-        resume_score = values["similarity_score"] 
+        resume_score = values.get("similarity_score")
         max_expected = 1.0
         points = 10.0 * max(0.0,(max_expected - resume_score) / max_expected)
-        values["performance_score"] = round(points,2)
+        values["performance_score"] = points
         return values
 
 #function tool
@@ -158,7 +152,7 @@ def performance_score_function(resume_id):
     #validating output
     validated_output = PerformanceOutput(similarity_score=s_score)
     #save score
-    STORE.scores[resume_id] = validated_output.performance_score
+    STORE.scores[resume_id] = round(validated_output.performance_score,2)
 
     return validated_output
 
