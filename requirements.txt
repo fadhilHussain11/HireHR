@@ -3,3 +3,4 @@ flask
 pydantic
 pdfplumber
 langchain_groq
+langchain_huggingface

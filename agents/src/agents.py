@@ -1,5 +1,5 @@
 import json, pdfplumber
-from src.utils import ResultStore,create_agent,get_llm
+from agents.src.utils import ResultStore,create_agent,get_llm
 from pydantic import BaseModel, Field, field_validator
 from langchain.tools import StructuredTool
 from langchain.prompts import SystemMessagePromptTemplate,HumanMessagePromptTemplate,ChatPromptTemplate
@@ -41,7 +41,6 @@ def load_pdf_and_store(resume_id,save_path):
 
     #store
     STORE.texts[resume_id] = validated_output.texts
-    print(validated_output)
     return validated_output
 
 #define load and store TOOl
@@ -52,6 +51,51 @@ LOADPDFTOSTORE = StructuredTool.from_function(
     args_schema=LoadInput,
     return_schema = LoadOutput
 )
+
+
+
+#------------- Info&Summary Tool --------------
+
+#input validation , for info tool 
+class InfoAndSummaryInput(BaseModel):
+    resume_id: str = Field(...,description="A unique id to refer to this resume")
+
+
+#defining info function
+def resume_info_and_summary(resume_id):
+    #taking text of resume from store 
+    text = STORE.texts.get(resume_id,"")
+
+    info_prompt = f"""
+    You are HR assistant. from the resume text below, extract the following:
+    
+    1. Full name
+    2. email address
+    3. Phone number
+    4. A concise, clear summary of the candidate, highlighting:
+         - Skills
+         - Years of experience
+    
+    Return the result in **strict Json format**
+
+    resume text:
+    {text}
+    """
+
+    llm_response = llm.predict(info_prompt)
+    print("hi fadhil ",llm_response)
+
+    #for safety if llm not give in the form of json format
+    try:
+        data = json.loads(llm_response)
+    except:
+        data = {"name":"","email":"","phone":"","summary":""}
+
+    #saving name and email to store by text resume
+    STORE.info[resume_id] = data 
+    return f"info and summary are saved"
+
+# define infoANDsummary TOOL
 
 
 #------------- WholeResult saving Tools -----------
