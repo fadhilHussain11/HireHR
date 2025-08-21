@@ -2,7 +2,7 @@ import os
 from flask import Flask,render_template,url_for,request,jsonify
 from agents.src.JD_embeddings import job_embedding
 from agents.src.agents import call_agent
-
+from agents.src.schedule_agent import call_schedule_agent
 #defining frontendpath
 temp_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','templates')
 static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),'frontend','static')
@@ -40,6 +40,14 @@ def Review_panel():
             results.append(result)
     return jsonify(results)
 
+@app.route('/select_candidate',methods=["POST"])
+def select_candidate():
+    data = request.get_json()
+    for person in data:
+        name = person.get('name')
+        email = person.get('email')
+        get_pdf_schedule = call_schedule_agent
+    return jsonify({"status":"success"})
 
 
     

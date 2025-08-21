@@ -3,6 +3,36 @@ const preview = document.getElementById("preview");
 const textareaBox = document.querySelector(".textarea-box");
 const uploadSection = document.querySelector(".upload-section");
 const tableSection = document.querySelector(".table-section");
+const tableBody = document.querySelector("#candidatesTable tbody");
+
+let tableData = [];
+
+
+
+const dummyCandidates = [
+  {
+    name: "Alice Johnson",
+    email: "alice@example.com",
+    phone: "9876543210",
+    performance_score: 88,
+    summary: "Full-stack developer with 5 years of experience in React, Node.js, and cloud services."
+  },
+  {
+    name: "Bob Smith",
+    email: "bob@example.com",
+    phone: "9123456780",
+    performance_score: 92,
+    summary: "Data scientist with strong expertise in Python, ML models, and big data frameworks."
+  },
+  {
+    name: "Charlie Brown",
+    email: "charlie@example.com",
+    phone: "9001122334",
+    performance_score: 76,
+    summary: "Frontend engineer skilled in Angular, TypeScript, and UX optimization."
+  }
+];
+
 
 // Step 1: Enter Requirement → Hide textarea, show upload
 textarea.addEventListener("input", () => {
@@ -46,9 +76,9 @@ uploadForm.addEventListener("submit", function(e) {
 });
 
 // Step 3: Populate table
-const tableBody = document.querySelector("#candidatesTable tbody");
 
 function loadTable(data) {
+  tableData = data;
   tableBody.innerHTML = "";
   data.forEach((item, index) => {
     const row = document.createElement("tr");
@@ -63,9 +93,37 @@ function loadTable(data) {
     `;
     tableBody.appendChild(row);
 
-    typeWriter(item.summary,`summary-${index}`,25)
+    typeWriter(item.summary,`summary-${index}`,25);
   });
 }
+
+
+//selected row to flask
+document.getElementById("sendBtn").addEventListener("click", () => {
+  const selectedData = [];
+
+  document
+    .querySelectorAll('input[name="selectRow"]:checked')
+    .forEach((checkbox) => {
+      const index = parseInt(checkbox.value);
+      selectedData.push(tableData[index]);
+  });
+
+  // send to flask
+  fetch("/select_candidate",{
+    method: "POST",
+    headers:{
+      "Content-Type" : "application/json"
+    },
+    body: JSON.stringify(selectedData),
+  })
+    .then(res => res.json())
+    .then(result => {
+      console.log("Backend response",result);
+    })
+    .catch(err=>console.error("error:",err));
+});
+
 
 function typeWriter(text,elementId,speed=30){
   let i = 0;
@@ -80,3 +138,10 @@ function typeWriter(text,elementId,speed=30){
   }
   typing();
 }
+
+
+// Load dummy candidates immediately on page load (for testing)
+document.addEventListener("DOMContentLoaded", () => {
+  tableSection.style.display = "block";  // show table directly
+  loadTable(dummyCandidates);
+});
