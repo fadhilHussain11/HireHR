@@ -1,4 +1,4 @@
-import json, pdfplumber
+import re,json, pdfplumber
 from agents.src.utils import ResultStore,create_agent,get_llm,get_embeddings
 from pydantic import BaseModel, Field, field_validator,model_validator
 from langchain.tools import StructuredTool
@@ -101,14 +101,17 @@ def resume_info_and_summary(resume_id):
     llm_response = llm.predict(info_prompt)
     print("hi fadhil ",llm_response)
 
-    #for safety if llm not give in the form of json format
-    try:
-        data = json.loads(llm_response)
-    except:
-        data = {"name":"","email":"","phone":"","summary":""}
+    #covert string to single variable by reg-ex
+    name = re.search(r'"name"\s*:\s*"([^"]+)"',llm_response).group(1)
+    email = re.search(r'"email"\s*:\s*"([^"]+)"',llm_response).group(1)
+    phone = re.search(r'"phone"\s*:\s*"([^"]+)"',llm_response).group(1)
+    summary = re.search(r'"summary"\s*:\s*"([^"]+)"',llm_response,re.DOTALL).group(1)
 
     #saving name and email to store by text resume
-    STORE.info[resume_id] = data 
+    STORE.name[resume_id] = name
+    STORE.email[resume_id] = email
+    STORE.phone[resume_id] = phone
+    STORE.summary[resume_id] = summary
     return f"info and summary are saved"
 
 # define infoANDsummary TOOL
@@ -178,14 +181,17 @@ class WholeresultInput(BaseModel):
 
 #defining tools function 
 def whole_result(resume_id):
-    info = STORE.info.get(resume_id,{})
+    name = STORE.name.get(resume_id,{})
+    email = STORE.email.get(resume_id,{})
+    phone = STORE.phone.get(resume_id,{})
+    summary = STORE.summary.get(resume_id,{})
     performance_score = STORE.scores.get(resume_id,{})
     result_out = {
-        "name":  info.get("name",""),
-        "email": info.get("email",""),
-        "phone": info.get("phone",""),
+        "name": name,
+        "email": email,
+        "phone": phone,
         "performance_score": performance_score,
-        "summary": info.get("summary","")
+        "summary": summary,
     }
     return json.dumps(result_out)
 

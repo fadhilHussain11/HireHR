@@ -22,15 +22,26 @@
       </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="table-section">
+    <!-- File Upload Section (hidden initially) -->
+    <div class="upload-section" style="display: none;">
+      <h3>Upload Candidate Resumes (PDF)</h3>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="resumes" id="resumes" multiple accept="application/pdf">
+        <button type="submit" class="btn">Upload</button>
+      </form>
+    </div>
+
+    <!-- Table Section (hidden initially) -->
+    <div class="table-section" style="display: none;">
       <table id="candidatesTable">
         <thead>
           <tr>
             <th>Select</th>
             <th>Name</th>
-            <th>Role</th>
-            <th>Experience</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Performance Score</th>
+            <th>Summary</th>
           </tr>
         </thead>
         <tbody>

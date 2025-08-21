@@ -26,8 +26,10 @@ def get_embeddings():
 class ResultStore():
     def __init__(self):
         self.texts: Dict[str,str] = {}
-        self.info: Dict[str,dict] = {}
-        self.summaries: Dict[str,str] = {}
+        self.name: Dict[str,str] = {}
+        self.email: Dict[str,str] = {}
+        self.phone: Dict[str,str] = {}
+        self.summary: Dict[str,str] = {}
         self.scores: Dict[str,float] = {}
 
 
@@ -46,7 +48,7 @@ def create_agent(tools,llm):
 #definig llm
 def get_llm():
     groq_api_key = os.getenv("GROQ_API_KEY")
-    llm = ChatGroq(model="meta-llama/llama-4-maverick-17b-128e-instruct",groq_api_key=groq_api_key)
+    llm = ChatGroq(model="gemma2-9b-it",groq_api_key=groq_api_key)
     return llm
 
 

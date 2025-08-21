@@ -29,8 +29,6 @@ def job_desc():
 @app.route('/Review_panel',methods=["POST"])
 def Review_panel():
     results = []
-    if "resumes" not in request.files:
-        return "No files are uploaded"
     files = request.files.getlist("resumes")
     for file in files:
         if file.filename.endswith(".pdf"):
@@ -40,7 +38,7 @@ def Review_panel():
             resume_id = os.path.splitext(file.filename)[0]
             result = call_agent(resume_id,save_path)
             results.append(result)
-    return f"results are : {results}"
+    return jsonify(results)
 
 
 
