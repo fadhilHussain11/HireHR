@@ -11,9 +11,9 @@ let tableData = [];
 
 const dummyCandidates = [
   {
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    phone: "9876543210",
+    name: "Fadhil Hussain",
+    email: "ibnhussainkv@gmail.com",
+    phone: "9645343919",
     performance_score: 88,
     summary: "Full-stack developer with 5 years of experience in React, Node.js, and cloud services."
   },

@@ -4,3 +4,5 @@ pydantic
 pdfplumber
 langchain_groq
 langchain_huggingface
+google-api-python-client
+google-auth-oauthlib

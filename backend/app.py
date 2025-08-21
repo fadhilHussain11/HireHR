@@ -43,10 +43,11 @@ def Review_panel():
 @app.route('/select_candidate',methods=["POST"])
 def select_candidate():
     data = request.get_json()
-    for person in data:
+    for index, person in enumerate(data):
         name = person.get('name')
         email = person.get('email')
-        get_pdf_schedule = call_schedule_agent
+        u_id = f"{index}_name"
+        get_pdf_schedule = call_schedule_agent(u_id,name,email)
     return jsonify({"status":"success"})
 
 

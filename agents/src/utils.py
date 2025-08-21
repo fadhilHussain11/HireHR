@@ -32,6 +32,14 @@ class ResultStore():
         self.summary: Dict[str,str] = {}
         self.scores: Dict[str,float] = {}
 
+#shared meomery for scheduling info 
+class ScheduleStore():
+    def __init__(self):
+        self.name: Dict[str,str] = {}
+        self.email: Dict[str,str] = {}
+        self.start_time: Dict[str,str] = {}
+        self.end_time: Dict[str,str] = {}
+        self.link: Dict[str,str] = {}
 
 #Agent initialization
 def create_agent(tools,llm):
