@@ -2,10 +2,10 @@
 An intelligent HR assistant that **automates resume screening and interview scheduling** using AI-powered agents.
 
 ##  Features
-- 📄 **Job Description Embedding** — HR enters a job description that is converted into vector embeddings.
-- 📑 **Resume Screening** — Upload multiple resumes (PDFs); the system finds **best-fit candidates**.
-- 📊 **Performance Scoring** — Each candidate gets a matching score against the job description.
-- 📅 **Interview Scheduling** — After HR selects candidates, interviews are booked via **Google Calendar API**.
+-  **Job Description Embedding** — HR enters a job description that is converted into vector embeddings.
+-  **Resume Screening** — Upload multiple resumes (PDFs); the system finds **best-fit candidates**.
+-  **Performance Scoring** — Each candidate gets a matching score against the job description.
+-  **Interview Scheduling** — After HR selects candidates, interviews are booked via **Google Calendar API**.
 
 ##  Agents & Tools
 A modular **multi-agent** setup with dedicated tools:
