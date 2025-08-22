@@ -1,25 +1,23 @@
-import random
-from agents.src.utils import ScheduleStore,create_agent,get_llm
+import random,json
+from agents.src.utils import create_agent,get_llm
 from pydantic import BaseModel, Field, field_validator,model_validator
 from langchain.tools import StructuredTool
-from agents.src.google_auth import calender_service
+from agents.src.google_auth import get_calender_service
 from datetime import datetime, timedelta
 from langchain.prompts import SystemMessagePromptTemplate,HumanMessagePromptTemplate,ChatPromptTemplate
 
 llm = get_llm()
 
-STORE = ScheduleStore()
 
-Schedules_info = []
 
 #--------Google Calender Tool-----------
 
 class CalenderInput(BaseModel):
-    u_id:str = Field(...,description="Unique Id of the person")
     name:str = Field(...,description="Name of the person")
     email:str = Field(...,description="Email address of the person")
 
-def scheduler_calender(u_id,name,email):
+def scheduler_calender(name,email):
+    calender_service = get_calender_service()
     #randomly select a date from tommorow
 
     #start time
@@ -48,8 +46,6 @@ def scheduler_calender(u_id,name,email):
             }
         ],
         "sendUpdates":"all",
-        "guestCanInviteOthers":False,
-        "guestCanModify":False,
         "description":f"Interview invitation from AbcMachine.ltd\n\n",
         "extendedProperties":{
             "private":{
@@ -64,16 +60,13 @@ def scheduler_calender(u_id,name,email):
 
     calender_link = created_event.get('htmlLink')
 
-    #saving all varibles to ScheduleStore
-    STORE.name[u_id] = name
-    STORE.email[u_id] = email
-    STORE.start_time[u_id] = start_iso
-    STORE.end_time[u_id] = end_iso
-    STORE.link[u_id] = calender_link
-
-    Schedules_info.append({"name":name,"email":email,"start_time":start_iso,"end_time":end_iso,"link":calender_link}) #this dict will sent returned to HR 
-    print("fadhil hi",Schedules_info)
-    return f"Scheduled: {calender_link}"
+    response_message = {
+        "name" : name,
+        "calender_link":calender_link,
+        "status":"success"
+    }
+    
+    return response_message
 
 
 CALENDER_TOOL = StructuredTool(
@@ -91,20 +84,23 @@ agent = create_agent(
     llm=llm,
 )
 
-def call_schedule_agent(u_id:str,name:str,email:str) -> dict:
+def call_schedule_agent(name:str,email:str) -> dict:
+    response_list = []
     system_template = """YOU are strict scheduler. your only job is to scedule an interview by calling 
-    CALENDER_TOOL(u_id,name,email) Exactly once.
-
+    CALENDER_TOOL(name,email) Exactly, when all required parametrs are provided.
 
     Rules:
-    - if u_id, name, and email are present -> call CALENDER_TOOL(u_id,name,email)
+    1. If name, and email are provided -> call CALENDER_TOOL(name,email)
+    2. do the scheduling by scheduler_calender function which is provided by tool
+    3.The ONLY final answer should be the dictionary returned by CALENDER_TOOL.
     """
 
     system_prompt = SystemMessagePromptTemplate.from_template(system_template)
 
-    human_template = "u_id={u_id}, name={name}, email={email}"
+    human_template = "name={name}, email={email}"
     human_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
     chat_prompt = ChatPromptTemplate.from_messages([system_prompt,human_prompt])
-    out = agent.invoke(chat_prompt.format_prompt(u_id=u_id,name=name,email=email))
-    return "agent done"
+    out = agent.invoke(chat_prompt.format_prompt(name=name,email=email))
+    result = out.get("output") if isinstance(out,dict) else str(out)
+    return result # bt this loads by model if not , do by whole_result()

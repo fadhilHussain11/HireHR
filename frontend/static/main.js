@@ -2,36 +2,38 @@ const textarea = document.getElementById("reqText");
 const preview = document.getElementById("preview");
 const textareaBox = document.querySelector(".textarea-box");
 const uploadSection = document.querySelector(".upload-section");
+const WaitingMessage = document.querySelector(".waitingMessegeSection")
 const tableSection = document.querySelector(".table-section");
 const tableBody = document.querySelector("#candidatesTable tbody");
+
 
 let tableData = [];
 
 
 
-const dummyCandidates = [
-  {
-    name: "Fadhil Hussain",
-    email: "ibnhussainkv@gmail.com",
-    phone: "9645343919",
-    performance_score: 88,
-    summary: "Full-stack developer with 5 years of experience in React, Node.js, and cloud services."
-  },
-  {
-    name: "Bob Smith",
-    email: "bob@example.com",
-    phone: "9123456780",
-    performance_score: 92,
-    summary: "Data scientist with strong expertise in Python, ML models, and big data frameworks."
-  },
-  {
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    phone: "9001122334",
-    performance_score: 76,
-    summary: "Frontend engineer skilled in Angular, TypeScript, and UX optimization."
-  }
-];
+// const dummyCandidates = [
+//   {
+//     name: "Fadhil Hussain",
+//     email: "ibnhussainkv@gmail.com",
+//     phone: "9645343919",
+//     performance_score: 88,
+//     summary: "Full-stack developer with 5 years of experience in React, Node.js, and cloud services."
+//   },
+//   {
+//     name: "Bob Smith",
+//     email: "bob@example.com",
+//     phone: "9123456780",
+//     performance_score: 92,
+//     summary: "Data scientist with strong expertise in Python, ML models, and big data frameworks."
+//   },
+//   {
+//     name: "Charlie Brown",
+//     email: "charlie@example.com",
+//     phone: "9001122334",
+//     performance_score: 76,
+//     summary: "Frontend engineer skilled in Angular, TypeScript, and UX optimization."
+//   }
+// ];
 
 
 // Step 1: Enter Requirement → Hide textarea, show upload
@@ -58,6 +60,7 @@ textarea.addEventListener("input", () => {
 // Step 2: Upload PDF files
 const uploadForm = document.getElementById("uploadForm");
 uploadForm.addEventListener("submit", function(e) {
+  WaitingMessage.style.display = "block";
   e.preventDefault();
   const formData = new FormData(uploadForm);
 
@@ -69,6 +72,7 @@ uploadForm.addEventListener("submit", function(e) {
   .then(data => {
     console.log("✅ Files uploaded:", data);
     uploadSection.style.display = "none";  // hide upload section
+    WaitingMessage.style.display = "none";
     tableSection.style.display = "block";  // show table section
     loadTable(data); // use backend JSON
   })
@@ -119,7 +123,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   })
     .then(res => res.json())
     .then(result => {
-      console.log("Backend response",result);
+      alert("scheduling Done");
+      console.log(result)
     })
     .catch(err=>console.error("error:",err));
 });
@@ -141,7 +146,7 @@ function typeWriter(text,elementId,speed=30){
 
 
 // Load dummy candidates immediately on page load (for testing)
-document.addEventListener("DOMContentLoaded", () => {
-  tableSection.style.display = "block";  // show table directly
-  loadTable(dummyCandidates);
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   tableSection.style.display = "block";  // show table directly
+//   loadTable(dummyCandidates);
+// });

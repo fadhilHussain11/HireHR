@@ -10,11 +10,17 @@ SCOPES =  [
 
 AUTH_FILE = r"D:\llmora\googleAuth.json"
 
+TOKEN_PATH = r"D:\llmora\token.pickle"
+
+
+calender_service = None
+    
+
 def get_auth_service(api_name,api_version):
 
     #check if any existed tokens are available
     creds = None
-    if os.path.exists('token.pickle'):
+    if os.path.exists(TOKEN_PATH):
         print("Load existing credential token")
         try:
             with open('token.pickle') as token:
@@ -67,7 +73,7 @@ def get_auth_service(api_name,api_version):
         
             #save credential for future use
             print("Saving credential to token.pickle")
-            with open('token.pickle','wb') as token:
+            with open(TOKEN_PATH,'wb') as token:
                 pickle.dump(creds,token)
             print("Credential saved")
         except Exception as e:
@@ -83,9 +89,13 @@ def get_auth_service(api_name,api_version):
 
 
 
-print("init..lization google service")
-calender_service = get_auth_service('calendar','v3')
-if calender_service:
-    print("calender service init...lization success") 
-else:
-    print("calender service init...lization failed")
+def get_calender_service():
+    global calender_service
+    if calender_service is None:
+        print("init..lization google service")
+        calender_service = get_auth_service('calendar','v3')
+        if calender_service:
+            print("calender service init...lization success") 
+        else:
+            print("calender service init...lization failed")
+    return calender_service

@@ -211,3 +211,5 @@ __marimo__/
 
 #json google api
 googleAuth.json
+
+token.pickle
