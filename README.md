@@ -64,7 +64,8 @@ http://127.0.0.1:5000/
 - Review ranked candidates   
 - Schedule interviews 
 
-##Demo
+## Workflow
+![Demo](https://github.com/fadhilHussain11/HireHR/blob/main/uploads/worflow.jpg)
 
 ##  Embeddings Example
 from langchain_community.embeddings import HuggingFaceEmbeddings  
@@ -88,3 +89,6 @@ embeddings = HuggingFaceEmbeddings(
 - Add chat-based HR assistant for live Q&A.  
 - Support multi-round interview workflows.  
 - Integrate with Slack/Email notifications.  
+
+## output calender schedule
+![schedule](https://github.com/fadhilHussain11/HireHR/blob/main/uploads/calender_schedule.png)
